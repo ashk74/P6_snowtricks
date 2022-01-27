@@ -1,0 +1,13 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>{{ editMode ? "Modifier le trick" : "Ajouter un trick" }}</h1>
+	<hr>
+	{{ form_start(form) }}
+	{{ form_row(form.name, {'attr': {'placeholder': "Nom du trick"}}) }}
+	{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}}) }}
+
+	<button type="submit" class="btn btn-success">{{ editMode ? "Mettre à jour" : "Publier" }}</button>
+
+	{{ form_end(form) }}
+{% endblock %}
