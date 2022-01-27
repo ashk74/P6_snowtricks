@@ -4,7 +4,31 @@
 {% endblock %}
 
 {% block body %}
-	<h1>{{ trick.name }}</h1>
-	<p>{{ trick.content }}</p>
-	<small>{{ trick.createdAt|date('d/m/Y à H:i') }}</small>
-{% endblock %}
+	<article>
+		<h2>{{ trick.name }}</h2>
+		<div class="metadata mb-2">
+			Publié le
+			{{ trick.createdAt|date('d/m/Y à H:i') }}
+			| Catégorie :
+			{{ trick.category.name }}</small>
+	</div>
+	<div class="content mb-4">
+		{{ trick.content }}
+	</div>
+</article>
+<section id="comments">
+	<h3>Commentaires</h3>
+	{% for comment in trick.comments %}
+		<div class="mb-4">
+			<div class="col-3">
+				Publié par
+				{{ comment.author }}
+				le
+				{{ comment.createdAt | date('d/m/Y à H:i') }}
+			</div>
+			<div class="col">
+				{{ comment.content }}
+			</div>
+		</div>
+	{% endfor %}
+</section>{% endblock %}
