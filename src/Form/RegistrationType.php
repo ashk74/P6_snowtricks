@@ -2,31 +2,28 @@
 
 namespace App\Form;
 
-use App\Entity\Category;
-use App\Entity\Trick;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TrickType extends AbstractType
+class RegistrationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name')
-            ->add('content')
-            ->add('category', EntityType::class,[
-                'class' => Category::class,
-                'choice_label' => 'name'
-            ])
+            ->add('fullname')
+            ->add('email')
+            ->add('password', PasswordType::class)
+            ->add('confirmPassword', PasswordType::class)
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Trick::class,
+            'data_class' => User::class,
         ]);
     }
 }
