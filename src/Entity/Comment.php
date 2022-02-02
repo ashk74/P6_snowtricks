@@ -13,7 +13,7 @@ class Comment
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'text', length: 255)]
     private $content;
 
     #[ORM\Column(type: 'datetime')]
@@ -23,7 +23,8 @@ class Comment
     #[ORM\JoinColumn(nullable: false)]
     private $trick;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
     private $author;
 
     public function getId(): ?int
@@ -67,12 +68,12 @@ class Comment
         return $this;
     }
 
-    public function getAuthor(): ?string
+    public function getAuthor(): ?User
     {
         return $this->author;
     }
 
-    public function setAuthor(string $author): self
+    public function setAuthor(?User $author): self
     {
         $this->author = $author;
 

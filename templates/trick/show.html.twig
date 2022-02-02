@@ -22,7 +22,7 @@
 		<div class="mb-4">
 			<div class="col-3">
 				Publié par
-				{{ comment.author }}
+				{{ comment.author.fullname }}
 				le
 				{{ comment.createdAt | date('d/m/Y à H:i') }}
 			</div>
@@ -31,4 +31,10 @@
 			</div>
 		</div>
 	{% endfor %}
+	{{ form_start(commentForm) }}
+	{{ form_row(commentForm.content, {'attr': {'placeholder': "Contenu du commentaire"}}) }}
+
+	<button type="submit" class="btn btn-success">Commenter</button>
+
+	{{ form_end(commentForm) }}
 </section>{% endblock %}
