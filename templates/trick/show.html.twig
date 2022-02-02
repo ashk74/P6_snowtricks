@@ -31,10 +31,16 @@
 			</div>
 		</div>
 	{% endfor %}
-	{{ form_start(commentForm) }}
-	{{ form_row(commentForm.content, {'attr': {'placeholder': "Contenu du commentaire"}}) }}
 
-	<button type="submit" class="btn btn-success">Commenter</button>
+	{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+		{{ form_start(commentForm) }}
+		{{ form_row(commentForm.content, {'attr': {'placeholder': "Contenu du commentaire"}}) }}
 
-	{{ form_end(commentForm) }}
+		<button type="submit" class="btn btn-success">Commenter</button>
+
+		{{ form_end(commentForm) }}
+	{% else %}
+		<a href="{{ path('security_login') }}" class="btn btn-success" role="button">Connectez-vous pour commenter cet article</a>
+	{% endif %}
+
 </section>{% endblock %}
