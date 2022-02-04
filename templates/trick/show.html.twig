@@ -12,6 +12,12 @@
 			| Catégorie :
 			{{ trick.category.name }}</small>
 	</div>
+	<div class="row">
+		{% for picture in trick.pictures %}
+			<img class="col-md-4" src="{{ asset('uploads/pictures/' ~ picture.filename) }}" alt="">
+		{% endfor %}
+	</div>
+
 	<div class="content mb-4">
 		{{ trick.content }}
 	</div>
@@ -26,6 +32,8 @@
 				le
 				{{ comment.createdAt | date('d/m/Y à H:i') }}
 			</div>
+
+
 			<div class="col">
 				{{ comment.content }}
 			</div>
