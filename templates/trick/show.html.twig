@@ -4,7 +4,51 @@
 {% endblock %}
 
 {% block body %}
-	<h1>{{ trick.name }}</h1>
-	<p>{{ trick.content }}</p>
-	<small>{{ trick.createdAt|date('d/m/Y à H:i') }}</small>
-{% endblock %}
+	<article>
+		<h2>{{ trick.name }}</h2>
+		<div class="metadata mb-2">
+			Publié le
+			{{ trick.createdAt|date('d/m/Y à H:i') }}
+			| Catégorie :
+			{{ trick.category.name }}</small>
+	</div>
+	<div class="row">
+		{% for picture in trick.pictures %}
+			<img class="col-md-4" src="{{ asset('uploads/pictures/' ~ picture.filename) }}" alt="">
+		{% endfor %}
+	</div>
+
+	<div class="content mb-4">
+		{{ trick.content }}
+	</div>
+</article>
+<section id="comments">
+	<h3>Commentaires</h3>
+	{% for comment in trick.comments %}
+		<div class="mb-4">
+			<div class="col-3">
+				Publié par
+				{{ comment.author.fullname }}
+				le
+				{{ comment.createdAt | date('d/m/Y à H:i') }}
+			</div>
+
+
+			<div class="col">
+				{{ comment.content }}
+			</div>
+		</div>
+	{% endfor %}
+
+	{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+		{{ form_start(commentForm) }}
+		{{ form_row(commentForm.content, {'attr': {'placeholder': "Contenu du commentaire"}}) }}
+
+		<button type="submit" class="btn btn-success">Commenter</button>
+
+		{{ form_end(commentForm) }}
+	{% else %}
+		<a href="{{ path('security_login') }}" class="btn btn-success" role="button">Connectez-vous pour commenter cet article</a>
+	{% endif %}
+
+</section>{% endblock %}

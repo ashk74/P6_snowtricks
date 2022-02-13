@@ -6,6 +6,8 @@
 	{{ form_start(form) }}
 	{{ form_row(form.name, {'attr': {'placeholder': "Nom du trick"}}) }}
 	{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}}) }}
+	{{ form_row(form.pictures, {'attr': {'placeholder': "Image"}}) }}
+	{{ form_row(form.category) }}
 
 	<button type="submit" class="btn btn-success">{{ editMode ? "Mettre à jour" : "Publier" }}</button>
 
