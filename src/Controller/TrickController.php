@@ -5,18 +5,29 @@ namespace App\Controller;
 use App\Entity\Trick;
 use App\Entity\Comment;
 use App\Entity\Picture;
+use App\Entity\Video;
 use App\Form\TrickType;
 use App\Form\CommentType;
-use App\Repository\TrickRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
+
+use App\Repository\TrickRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TrickController extends AbstractController
 {
+    private $entityManager;
+    protected $requestStack;
+
+    public function __construct(RequestStack $requestStack, EntityManagerInterface $entityManager) {
+        $this->requestStack = $requestStack;
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/', name: 'tricks_all')]
     public function index(TrickRepository $repository): Response
     {
@@ -29,19 +40,25 @@ class TrickController extends AbstractController
 
     #[Route('/trick/new', name: 'trick_create')]
     #[Route('/trick/edit/{slug}', name: 'trick_update')]
-    public function create(Request $request, EntityManagerInterface $manager, SluggerInterface $slugger, Trick $trick = null): Response
+    public function create(SluggerInterface $slugger, Trick $trick = null): Response
     {
         if (!$trick) {
             $trick = new Trick();
         }
 
+        $video1 = new Video();
+        $trick->getVideos()->add($video1);
+
+        $video2 = new Video();
+        $trick->getVideos()->add($video2);
+
         $form = $this->createForm(TrickType::class, $trick);
-        $form->handleRequest($request);
+        $form->handleRequest($this->requestStack->getCurrentRequest());
 
         if ($form->isSubmitted() && $form->isValid()) {
            if (!$trick->getId()) {
                 $trick->setCreatedAt(new \DateTime())
-                      ->setSlug($slugger->slug($trick->getName()));
+                      ->setSlug($slugger->slug(strtolower($trick->getName()), '-', 'en'));
             } else {
                 $trick->setUpdatedAt(new \DateTime());
             }
@@ -50,7 +67,7 @@ class TrickController extends AbstractController
             $files = $form->get('pictures')->getData();
 
             foreach ($files as $key => $file) {
-                $safeFilename = $slugger->slug($trick->getName());
+                $safeFilename = $slugger->slug(strtolower($trick->getName()), '-', 'en');
                 $newFilename = $safeFilename . '-' . md5(uniqid()) . '.' . $file->guessExtension();
                 $file->move(
                     $uploadsDirectory,
@@ -70,8 +87,11 @@ class TrickController extends AbstractController
                 $trick->addPicture($picture);
             }
 
-            $manager->persist($trick);
-            $manager->flush();
+            $video1->setTrick($trick);
+            $video2->setTrick($trick);
+
+            $this->entityManager->persist($trick);
+            $this->entityManager->flush();
 
             return $this->redirectToRoute('trick_show', ['slug' => $trick->getSlug()]);
         }
@@ -83,25 +103,33 @@ class TrickController extends AbstractController
     }
 
     #[Route('/trick/details/{slug}', name: 'trick_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, Trick $trick, EntityManagerInterface $manager)
+    public function show(Trick $trick)
     {
         $comment = new Comment();
 
         $form = $this->createForm(CommentType::class, $comment);
-        $form->handleRequest($request);
+        $form->handleRequest($this->requestStack->getCurrentRequest());
 
         if ($form->isSubmitted() && $form->isValid()) {
             $comment->setTrick($trick)
                     ->setAuthor($this->getUser())
                     ->setCreatedAt(new \DateTime());
 
-            $manager->persist($comment);
-            $manager->flush();
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
         }
 
         return $this->renderForm('trick/show.html.twig', [
             'trick' => $trick,
             'commentForm' => $form
         ]);
+    }
+
+    #[Route('/trick/delete/{slug}', name: 'trick_delete', methods: ['GET', 'POST'])]
+    public function delete(Trick $trick) {
+        $this->entityManager->remove($trick);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('tricks_all');
     }
 }
