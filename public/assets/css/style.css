@@ -1,0 +1,9 @@
+.index-header {
+  height: 100vh;
+  min-height: 500px;
+  color: white;
+  background-image: url('../images/mountain-header.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
