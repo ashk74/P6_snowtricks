@@ -4,11 +4,15 @@
 	<h1>{{ editMode ? "Modifier le trick" : "Ajouter un trick" }}</h1>
 	<hr>
 	{{ form_start(form) }}
-	{{ form_row(form.name, {'attr': {'placeholder': "Nom du trick"}}) }}
-	{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}}) }}
-	{{ form_row(form.pictures, {'attr': {'placeholder': "Image"}}) }}
-	{{ form_row(form.category) }}
+	{{ form_row(form.name, {'attr': {'placeholder': "Nom du trick"}, 'label' : false }) }}
+	{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}, 'label' : false }) }}
+	{{ form_row(form.pictures, {'attr': {'placeholder': "Image"}, 'label' : false }) }}
+	{% for video in form.videos %}
+		{{ form_row(video.title, {'attr': {'placeholder': "Titre de la video"}, 'label' : false }) }}
+		{{ form_row(video.url, {'attr': {'placeholder': "URL de la video"}, 'label' : false }) }}
+	{% endfor %}
 
+	{{ form_row(form.category, {'label' : false}) }}
 	<button type="submit" class="btn btn-success">{{ editMode ? "Mettre à jour" : "Publier" }}</button>
 
 	{{ form_end(form) }}
