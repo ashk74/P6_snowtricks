@@ -19,5 +19,15 @@
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
+###> exclude .env files ###
 .env
 .env.*
+###< exclude .env files ###
+
+###> exclude vscode configuration files ###
+.vscode
+###< exclude vscode configuration files ###
+
+###> exclude uploaded files ###
+/public/uploads
+###< exclude uploaded files ###
