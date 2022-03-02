@@ -1,50 +1,145 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello world !
+{% block title %}
+	{{ parent() }} | {{ trick.name }}
 {% endblock %}
 
 {% block body %}
+	{# Start : Trick content #}
 	<article>
 		<h2>{{ trick.name }}</h2>
-		<div class="metadata mb-2">
-			Publié le {{ trick.createdAt|date('d/m/Y à H:i') }} | Catégorie : {{ trick.category.name }}</small>
-		</div>
 		<div class="row">
 			{% for picture in trick.pictures %}
-				<img class="col-md-4" src="{{ asset('uploads/pictures/' ~ picture.filename) }}" alt="">
+				{% if picture.isMain == true %}
+					<div class="col-md-12">
+						<img class="mb-4 img-fluid rounded" src="{{ asset('uploads/pictures/' ~ picture.filename) }}" alt="">
+					</div>
+				{% endif %}
 			{% endfor %}
 		</div>
-		<div class="content my-4">
-			{{ trick.content }}
-		</div>
-		<div class="row">
-			{% for video in trick.videos %}
-				{{ embed_video(video.url, video.title)|raw }}
-			{% endfor %}
-		</div>
-	</article>
-	<section id="comments">
-		<h3>{{ trick.comments | length }} Commentaires</h3>
-		{% for comment in trick.comments %}
-			<div class="mb-4">
-				<div class="col-3">
-					Publié par {{ comment.author.fullname }} le {{ comment.createdAt | date('d/m/Y à H:i') }}
+
+		{% if trick.pictures.count > 1 or trick.videos.count >= 1 %}
+			<div>
+				{% if trick.pictures.count > 1 %}
+					<div class="accordion" id="accordionExample">
+						<div class="accordion-item">
+						<h2 class="accordion-header" id="headingOne">
+							<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+								Photos
+							</button>
+						</h2>
+						<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+							<div class="accordion-body row">
+								{% for picture in trick.pictures %}
+									{% if picture.isMain == false %}
+										<div class="col-md-3">
+											<img class="mb-4 img-fluid rounded" src="{{ asset('uploads/pictures/' ~ picture.filename) }}" alt="">
+										</div>
+									{% endif %}
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				{% endif %}
+				{% if trick.videos.count >= 1 %}
+				<div class="accordion-item">
+					<h2 class="accordion-header" id="headingTwo">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+							Vidéos
+						</button>
+					</h2>
+					<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+						<div class="accordion-body row">
+							{% for video in trick.videos %}
+								{{ embed_video(video.url, video.title)|raw }}
+							{% endfor %}
+						</div>
+					</div>
 				</div>
-				<div class="col">
-					{{ comment.content }}
-				</div>
+				{% endif %}
 			</div>
-		{% endfor %}
-
-		{% if is_granted('IS_AUTHENTICATED_FULLY') %}
-			{{ form_start(commentForm) }}
-			{{ form_row(commentForm.content, {'attr': {'placeholder': "Contenu du commentaire"}, 'label' : false}) }}
-
-			<button type="submit" class="btn btn-success">Commenter</button>
-
-			{{ form_end(commentForm) }}
-		{% else %}
-			<a href="{{ path('security_login') }}" class="btn btn-success" role="button">Connectez-vous pour commenter cet article</a>
 		{% endif %}
+
+
+		<div class="px-2 py-4" style="text-align: justify;">
+			{{ trick.content|nl2br }}
+		</div>
+
+		<div class="text-center py-3">
+			<span class="badge rounded-pill bg-info p-2 mx-2 fs-6"><i class="fa-solid fa-tag"></i> Catégorie : {{ trick.category.name }}</span>
+			<span class="badge rounded-pill bg-info p-2 mx-2 fs-6"><i class="fa-solid fa-circle-plus"></i> Publié : {{ trick.createdAt|date('d/m/Y | H:i') }}</span>
+
+			{% if trick.updatedAt is not null %}
+				<span class="badge rounded-pill bg-info p-2 mx-2 fs-6"><i class="fa-solid fa-rotate-right"></i> Mis à jour : {{ trick.updatedAt|date('d/m/Y | H:i') }}</span>
+			{% endif %}
+		</div>
+
+	</article>
+	{# End : Trick content #}
+
+	{# Start : Comment form + Comments content #}
+	<section class="py-4 px-2">
+		<div class="border border-light rounded p-2">
+			{# Start : Check if the user is authenticated #}
+			{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+				{{ form_start(commentForm) }}
+				{{ form_row(commentForm.content, {'attr': {'placeholder': 'Contenu du commentaire'}, 'label' : false}) }}
+				<button type="submit" class="btn btn-success form-control">Commenter</button>
+				{{ form_end(commentForm) }}
+			{% else %}
+				<div class="text-center">
+					<a href="{{ path('security_login') }}" class="btn btn-success btn-lg" role="button">Connectez-vous pour commenter cet article</a>
+				</div>
+
+			{% endif %}
+			{# End : Check if the user is authenticated #}
+		</div>
+
+		<div class="p-2 my-4 border border-light rounded">
+			{# Start : Display comments content #}
+			<h3 class="text-center py-2">{{ comments.count > 0 ? comments.count ~ ' commentaires' : 'Aucun commentaire' }}</h3>
+			{% for comment in comments.iterator %}
+				<div class="card font-monospace my-2">
+					<h5 class="card-header small text-secondary">
+						{{ comment.author.fullname }} | {{ comment.createdAt | date('d/m/Y | H:i') }}
+					</h5>
+					<div class="card-body">
+						<p class="card-text">{{ comment.id }} | {{ comment.content | nl2br }}</p>
+					</div>
+
+					{% if is_granted('IS_AUTHENTICATED_FULLY') and app.user.email == comment.author.email %}
+						<div class="card-footer text-end">
+							<a href="#" class="link-danger text-decoration-none">Supprimer</a>
+						</div>
+					{% endif %}
+				</div>
+			{% endfor %}
+			{# End : Display comments content #}
+		</div>
 	</section>
+	{# End : Comment form + Comments content #}
+
+	{% if lastPage > 1 %}
+		{# Start : Pagination system #}
+		<div>
+			<nav>
+				<ul class="pagination justify-content-center">
+					<li class="page-item {{ currentPage <= 1 ? 'disabled' }}">
+						<a class="page-link" href="{{ path('trick_show_paginated', {'slug': trick.slug, 'page': currentPage != 1 ? currentPage - 1 : 1}) }}">Précédente</a>
+					</li>
+
+					{% for page in range(1, lastPage) %}
+						<li class="page-item {{ currentPage == page ? 'active' : '' }}">
+							<a class="page-link" href="{{ path('trick_show_paginated', {'slug': trick.slug, 'page': page}) }}">{{ page }}</a>
+						</li>
+					{% endfor %}
+
+					<li class="page-item {{ currentPage >= lastPage ? 'disabled' }}">
+						<a class="page-link" href="{{ path('trick_show_paginated', {'slug': trick.slug, 'page': currentPage != lastPage ? currentPage + 1 : lastPage}) }}">Suivante</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+		{# End : Pagination system #}
+	{% endif %}
 {% endblock %}
