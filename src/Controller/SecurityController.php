@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationType;
-
+use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,24 +14,40 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class SecurityController extends AbstractController
 {
+    private $entityManager;
+    private $passwordHasher;
+
+    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    {
+        $this->entityManager = $entityManager;
+        $this->passwordHasher = $passwordHasher;
+    }
+
     #[Route('/signup', name: 'security_registration')]
-    public function registration(Request $request, EntityManagerInterface $manager, UserPasswordHasherInterface $passwordHasher): Response
+    public function registration(Request $request, FileUploader $fileUploader): Response
     {
         $user = new User();
-        $form = $this->createForm(RegistrationType::class, $user);
 
+        $form = $this->createForm(RegistrationType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $hashedPassword = $passwordHasher->hashPassword($user, $user->getPassword());
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
+            $avatarFile = $form->get('avatar')->getData();
+
+            if ($avatarFile) {
+                $fileUploader->upload($avatarFile, 'avatars');
+                $user->setAvatar($fileUploader->getFinalFileName());
+            } else {
+                $user->setAvatar('default-avatar.jpg');
+            }
 
             $user->setPassword($hashedPassword);
-
-            $user->setAvatar('avatar.jpg');
             $user->setIsValidate(true);
             $user->setCreatedAt(new \DateTime());
-            $manager->persist($user);
-            $manager->flush();
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             return $this->redirectToRoute('security_login');
         }
@@ -48,5 +64,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/logout', name: 'security_logout')]
-    public function logout() {}
+    public function logout()
+    {
+    }
 }
