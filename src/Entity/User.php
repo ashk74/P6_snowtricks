@@ -30,8 +30,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $email;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $avatar;
+    private $avatar = 'default-avatar.jpg';
 
+    #[Assert\Length(
+        min: 4,
+        minMessage: 'Doit contenir minimum {{ limit }} caractères'
+    )]
     #[ORM\Column(type: 'string', length: 255)]
     private $fullname;
 
@@ -42,17 +46,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private $password;
 
-    #[Assert\EqualTo(
-        propertyPath: 'password',
-        message: 'Les mots de passe doivent être identiques'
-    )]
-    private $confirmPassword;
-
     #[ORM\Column(type: 'json')]
     private $roles = [];
 
     #[ORM\Column(type: 'boolean')]
-    private $isValidate;
+    private $isVerified = false;
 
     #[ORM\Column(type: 'datetime')]
     private $createdAt;
@@ -170,14 +168,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getIsValidate(): ?bool
+    public function isVerified(): ?bool
     {
-        return $this->isValidate;
+        return $this->isVerified;
     }
 
-    public function setIsValidate(bool $isValidate): self
+    public function setIsVerified(bool $isVerified): self
     {
-        $this->isValidate = $isValidate;
+        $this->isVerified = $isVerified;
 
         return $this;
     }
@@ -208,7 +206,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials() {}
+    public function eraseCredentials()
+    {
+    }
 
     /**
      * @return Collection|Comment[]
