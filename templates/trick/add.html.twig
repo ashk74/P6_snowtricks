@@ -1,0 +1,37 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Ajouter un trick</h1>
+	{{ form_start(form) }}
+		<div class="border rounded p-3 my-3">
+			{{ form_row(form.mainPicture) }}
+		</div>
+
+		{{ form_row(form.name, {'attr': {'placeholder': "Nom du trick"}, 'label' : false}) }}
+		{{ form_errors(form.name) }}
+		{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}, 'label' : false}) }}
+		{{ form_row(form.category, {'label' : false}) }}
+
+		<div class="border rounded p-3 mb-3">
+			{{ form_row(form.pictures) }}
+		</div>
+
+		<div class="border rounded p-3 mb-3">
+			<h2>Vidéos</h2>
+
+			<ul class="videos"
+				data-index="{{ form.videos|length > 0 ? form.videos|last.vars.name + 1 : 0 }}"
+				data-prototype="{{ form_row(form.videos.vars.prototype)|e('html_attr') }}"
+			></ul>
+
+			<button type="button" class="add_item_link btn btn-primary btn-sm" data-collection-holder-class="videos">Ajouter une vidéo</button>
+		</div>
+
+		<button type="submit" class="btn btn-success">Publier</button>
+	{{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('assets/js/manage-videos-collection.js') }}"></script>
+{% endblock %}
