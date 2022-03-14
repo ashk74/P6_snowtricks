@@ -29,9 +29,9 @@ class EmbedVideo extends AbstractExtension
         $parsedUrl = parse_url($url);
 
         if ($parsedUrl['host'] === 'youtu.be') {
-            $this->iframe = '<iframe class="col-md-4 mb-4" width="560px" height="315px" src="https://www.youtube.com/embed' . $parsedUrl['path'] . '" title="' . $videoTitle . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+            $this->iframe = '<iframe class="col-12" width="560px" height="315px" src="https://www.youtube.com/embed' . $parsedUrl['path'] . '" title="' . $videoTitle . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
         } else {
-            $this->iframe = '<iframe class="col-md-4 mb-4" frameborder="0" width="560" height="315" src="https://www.dailymotion.com/embed/video' . $parsedUrl['path'] . '" title="' . $videoTitle . '"allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>';
+            $this->iframe = '<iframe class="col-12" frameborder="0" width="560" height="315" src="https://www.dailymotion.com/embed/video' . $parsedUrl['path'] . '" title="' . $videoTitle . '"allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>';
         }
 
         return $this->iframe;
