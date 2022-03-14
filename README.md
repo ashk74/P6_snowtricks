@@ -8,10 +8,10 @@
 *   PHP extensions : Ctype, iconv, JSON, PCRE, Session, SimpleXML and Tokenizer
 *   SQL DBMS
 
-#### Versions used in this project :
-*   Apache 2.4.46
-*   MySQL 5.7.34
-*   PHP 8.1.3
+*   Versions used in this project
+    *   Apache 2.4.46
+    *   MySQL 5.7.34
+    *   PHP 8.1.3
 
 ### SMTP Server
 *   Used for email verification and reset password
@@ -29,7 +29,7 @@
 *   Download zip files or clone the project repository with github - [GitHub documentation](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository)
 
 ### 2.  Edit .env file
-```
+```yaml
 # SQL DBMS
 DATABASE_URL="mysql://username:password@host:port/dbname"
 
@@ -44,33 +44,29 @@ ACCOUNT_PASSWORD=your_password
 ```
 
 ### 3.  Set your PHP version
-```
-# List and select PHP version (minimum 7.2.5)
+*   List and select PHP version (minimum 7.2.5)
+```bash
 symfony local:php:list
-
-# Set PHP version
-# Exemple :
+```
+*   Set your PHP version
+```
 echo 8.1.3 > .php-version
 ```
+
 ### 4.  Install packages needed
 #### Run your terminal at root project
-```
+```bash
 composer install
 ```
 
 ### 5.  Create database and tables
-```
-# Create the database
+```bash
 php bin/console doctrine:database:create
-
-# Create all tables needed
 php bin/console doctrine:migrations:migrate
 ```
 
-### 6.  Load fixtures
-```
-# Insert start data into the database
-# Move pictures and avatar inside uploads directory
+### 6.  Load fixtures with pictures and avatar
+```bash
 php bin/console doctrine:fixtures:load
 ```
 ### 7. Connexion
