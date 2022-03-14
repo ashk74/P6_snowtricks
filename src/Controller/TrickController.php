@@ -9,7 +9,7 @@ use App\Form\TrickType;
 use App\Form\CommentType;
 use App\Repository\CategoryRepository;
 use App\Repository\TrickRepository;
-use App\Service\FileUploader;
+use App\Service\FileManager;
 use App\Service\Pagination;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,13 +34,13 @@ class TrickController extends AbstractController
      *
      * @param \Symfony\Component\String\Slugger\SluggerInterface $slugger
      * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param \App\Service\FileUploader $fileUploader
+     * @param \App\Service\FileManager $fileManager
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     #[IsGranted('ROLE_USER')]
     #[Route('/trick/add', name: 'trick_add')]
-    public function add(SluggerInterface $slugger, Request $request, FileUploader $fileUploader): Response
+    public function add(SluggerInterface $slugger, Request $request, FileManager $fileManager): Response
     {
         $trick = new Trick();
 
@@ -52,7 +52,7 @@ class TrickController extends AbstractController
 
             // Check if mainPicture is not empty
             if ($form->get('mainPicture')->getData() != null) {
-                $mainPictureFilename = $fileUploader->upload($form->get('mainPicture')->getData(), 'pictures');
+                $mainPictureFilename = $fileManager->upload($form->get('mainPicture')->getData(), 'pictures');
             }
 
             // Set main picture
@@ -64,7 +64,7 @@ class TrickController extends AbstractController
 
             // Set other pictures
             foreach ($form->get('pictures')->getData() as $file) {
-                $pictureFilename = $fileUploader->upload($file, 'pictures');
+                $pictureFilename = $fileManager->upload($file, 'pictures');
                 $picture = new Picture();
                 $picture->setTrick($trick)
                     ->setFilename($pictureFilename);

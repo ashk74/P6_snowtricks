@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Trick;
 use App\Entity\Picture;
 use App\Form\PictureType;
-use App\Service\FileUploader;
+use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +27,7 @@ class PictureController extends AbstractController
      */
     #[IsGranted('ROLE_USER')]
     #[Route('/trick/{slug}/picture/add', name: 'picture_add')]
-    public function add(Request $request, FileUploader $fileUploader, Trick $trick): Response
+    public function add(Request $request, FileManager $fileManager, Trick $trick): Response
     {
         $form = $this->createForm(PictureType::class);
         $form->handleRequest($request);
@@ -35,10 +35,10 @@ class PictureController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $files != null) {
             foreach ($form->get('filename')->getData() as $file) {
-                $fileUploader->upload($file, 'pictures');
+                $fileManager->upload($file, 'pictures');
                 $picture = new Picture();
                 $picture->setTrick($trick)
-                    ->setFilename($fileUploader->getFinalFileName());
+                    ->setFilename($fileManager->getFinalFileName());
                 $trick->addPicture($picture);
             }
 
@@ -59,11 +59,11 @@ class PictureController extends AbstractController
      */
     #[IsGranted('ROLE_USER')]
     #[Route('/trick/{slug}/picture/{id}/delete', name: 'picture_delete')]
-    public function delete(Picture $picture, FileUploader $fileUploader, string $slug): Response
+    public function delete(Picture $picture, FileManager $fileManager, string $slug): Response
     {
         $this->entitymanager->remove($picture);
         $this->entitymanager->flush();
-        $fileUploader->remove('pictures', $picture->getFilename());
+        $fileManager->remove('pictures', $picture->getFilename());
 
         $this->addFlash('success', 'Photo supprimée');
 

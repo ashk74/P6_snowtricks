@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
-use App\Service\FileUploader;
+use App\Service\FileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +38,7 @@ class UserController extends AbstractController
      */
     #[Route('/profile/{id}/edit', name: 'user_edit')]
     #[IsGranted('USER_PROFILE', subject: 'user')]
-    public function edit(User $user, Request $request, FileUploader $fileUploader): Response
+    public function edit(User $user, Request $request, FileManager $fileManager): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $oldAvatar = $user->getAvatar();
@@ -46,13 +46,13 @@ class UserController extends AbstractController
         $file = $form->get('avatar')->getData();
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $fileUploader->upload($file, 'avatars');
-            $user->setAvatar($fileUploader->getFinalFileName());
+            $fileManager->upload($file, 'avatars');
+            $user->setAvatar($fileManager->getFinalFileName());
             $this->entitymanager->persist($user);
             $this->entitymanager->flush();
 
             if ($oldAvatar != 'default-avatar.png') {
-                $fileUploader->remove('avatars', $oldAvatar);
+                $fileManager->remove('avatars', $oldAvatar);
             }
 
             $this->addFlash('success', 'Votre photo de profil a bien été mise à jour');

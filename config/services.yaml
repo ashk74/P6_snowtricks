@@ -23,7 +23,7 @@ services:
             - '../src/Kernel.php'
             - '../src/Tests/'
 
-    App\Service\FileUploader:
+    App\Service\FileManager:
         arguments:
             $uploadDirectory: '%upload_directory%'
 
