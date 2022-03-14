@@ -40,7 +40,7 @@ class TrickFixtures extends Fixture
             $trick->setName($name)
                 ->setContent($faker->paragraphs(mt_rand(5, 9), true))
                 ->setCategory($this->categoryRepo->findOneBy(['name' => $category]))
-                ->setCreatedAt($faker->dateTimeBetween($startDate = '-6 months', $endDate = 'now'))
+                ->setCreatedAt($faker->dateTimeBetween('-6 months', 'now'))
                 ->setSlug(strtolower(preg_replace('/ /', '-', $trick->getName())));
 
             $manager->persist($trick);

@@ -152,7 +152,7 @@ class TrickController extends AbstractController
      */
     #[IsGranted('ROLE_USER')]
     #[Route('/trick/{slug}/edit', name: 'trick_edit')]
-    public function edit(Trick $trick, SluggerInterface $slugger, Request $request, FileUploader $fileUploader): Response
+    public function edit(Trick $trick, SluggerInterface $slugger, Request $request): Response
     {
         $form = $this->createForm(TrickType::class, $trick, ['validation_groups' => false]);
 

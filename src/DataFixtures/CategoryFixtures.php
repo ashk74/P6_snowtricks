@@ -10,8 +10,6 @@ class CategoryFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        $faker = \Faker\Factory::create('fr_FR');
-
         $names = ['Grabs', 'Flips', 'Rotations', 'Slides'];
 
         foreach ($names as $name) {

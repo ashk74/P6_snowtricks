@@ -59,7 +59,7 @@ class UserFixtures extends Fixture
                 ->setFullname($firstname . ' ' . $lastname)
                 ->setPassword($hashedPassword)
                 ->setIsVerified(mt_rand(0, 1))
-                ->setCreatedAt($faker->dateTimeBetween($startDate = '-6 months', $endDate = 'now'));
+                ->setCreatedAt($faker->dateTimeBetween('-6 months', 'now'));
 
             $manager->persist($user);
         }
