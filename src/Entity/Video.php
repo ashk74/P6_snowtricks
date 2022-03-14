@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use App\Repository\VideoRepository;
 use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
 class Video
@@ -15,12 +15,22 @@ class Video
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Length(
+        min: 3,
+        minMessage: 'Le titre doit contenir minimum {{ limit }} caractères',
+        max: 30,
+        maxMessage: 'Le titre doit contenir maximum {{ limit }} caractères'
+    )]
     private $title;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Url(
+        protocols: ['https'],
+        message: 'URL invalide',
+    )]
     #[Assert\Regex(
         pattern: '#(youtu)|(dai\.?ly)#',
-        message: 'URL invalide'
+        message: 'Les format d\'URL acceptés sont : https://youtu.be/videoID et https://dai.ly/videoID'
     )]
     private $url;
 

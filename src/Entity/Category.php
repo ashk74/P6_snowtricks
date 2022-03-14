@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
@@ -16,6 +17,12 @@ class Category
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Length(
+        min: 3,
+        max: 15,
+        minMessage: 'Le nom de la catégorie doit contenir minimum {{ limit }} caractères',
+        maxMessage: 'Le nom de la catégorie doit contenir maximum {{ limit }} caractères'
+    )]
     private $name;
 
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: Trick::class)]

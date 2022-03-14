@@ -24,9 +24,7 @@ class Trick
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\Length(
         min: 3,
-        max: 50,
         minMessage: 'Le nom du trick doit contenir minimum {{ limit }} caractères',
-        maxMessage: 'Le nom du trick doit contenir maximum {{ limit }} caractères',
     )]
     private $name;
 
@@ -50,13 +48,24 @@ class Trick
     #[ORM\JoinColumn(nullable: false)]
     private $category;
 
-    #[ORM\OneToMany(mappedBy: 'trick', targetEntity: Comment::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'trick', targetEntity: Comment::class, orphanRemoval: true, cascade: ['persist'])]
     private $comments;
 
     #[ORM\OneToMany(mappedBy: 'trick', targetEntity: Picture::class, orphanRemoval: true, cascade: ['persist'])]
+    #[Assert\All([
+        new Assert\Image(
+            maxSize: '3M',
+            uploadFormSizeErrorMessage: 'Le poid de l\'image doit être de 3Mo maximum',
+            allowLandscape: false,
+            allowLandscapeMessage: 'L\'image doit être de forme carré',
+            allowPortrait: false,
+            allowPortraitMessage: 'L\'image doit être de forme carré'
+        )
+    ])]
     private $pictures;
 
     #[ORM\OneToMany(mappedBy: 'trick', targetEntity: Video::class, orphanRemoval: true, cascade: ['persist'])]
+    #[Assert\Valid()]
     private $videos;
 
     public function __construct()

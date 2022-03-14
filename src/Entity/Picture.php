@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PictureRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PictureRepository::class)]
 class Picture
@@ -17,7 +18,7 @@ class Picture
     private $filename;
 
     #[ORM\Column(type: 'boolean')]
-    private $isMain;
+    private $isMain = false;
 
     #[ORM\ManyToOne(targetEntity: Trick::class, inversedBy: 'pictures')]
     #[ORM\JoinColumn(nullable: false)]
