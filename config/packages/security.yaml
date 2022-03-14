@@ -1,4 +1,6 @@
 security:
+    access_denied_url: tricks_all
+
     enable_authenticator_manager: true
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
@@ -26,12 +28,10 @@ security:
             lazy: true
             provider: in_database
 
-
             form_login:
                 login_path: app_login
                 check_path: app_login
                 default_target_path: tricks_all
-                use_referer: true
                 enable_csrf: true
 
             logout:
