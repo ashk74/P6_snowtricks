@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ parent() }} | Upload avatar
+{% endblock %}
+
+{% block header %}
+	{% for label, messages in app.flashes() %}
+		{% for message in messages %}
+			<div class="alert alert-{{ label }} alert-dismissible fade show rounded-0 border-0" role="alert">
+				<div class="text-center lead">
+					<i class="{{ label == 'info' ? 'bi bi-info-square' : 'bi bi-check-square' }}"></i> {{ message | raw }}
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		{% endfor %}
+	{% endfor %}
+{% endblock %}
+
+{% block body %}
+	{{ form_start(userForm) }}
+    {{ form_row(userForm.avatar) }}
+	<button type="submit" class="btn btn-success">Mettre à jour</button>
+	{{ form_end(userForm) }}
+{% endblock %}
