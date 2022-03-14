@@ -3,9 +3,18 @@
 {% block body %}
 	<h1>Modifier : {{ trick.name }}</h1>
 	{{ form_start(form) }}
+		<div class="mb-3">
+			{{ form_widget(form.name, {'attr': {'placeholder': "Nom du trick"}, 'label' : false}) }}
+			{{ form_errors(form.name) }}
+			<div id="trick-name-result" class="d-block"></div>
+		</div>
 
-		{{ form_row(form.name, {'attr': {'placeholder': "Nom du trick"}, 'label' : false}) }}
-		{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}, 'label' : false}) }}
+		<div class="mb-3">
+			{{ form_row(form.content, {'attr': {'placeholder': "Description du trick"}, 'label' : false}) }}
+			{{ form_errors(form.content) }}
+			<div id="trick-content-result" class="d-block"></div>
+		</div>
+
 		{{ form_row(form.category, {'label' : false}) }}
 
 		<button type="submit" class="btn btn-success">Mettre à jour</button>
@@ -15,4 +24,6 @@
 {% block javascripts %}
 	{{ parent() }}
 	<script src="{{ asset('assets/js/manage-videos-collection.js') }}"></script>
+	<script src="{{ asset('assets/js/count-field-char.js') }}"></script>
+	<script src="{{ asset('assets/js/valid-trick-form.js') }}"></script>
 {% endblock %}
