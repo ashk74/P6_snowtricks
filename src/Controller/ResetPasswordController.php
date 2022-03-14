@@ -68,11 +68,7 @@ class ResetPasswordController extends AbstractController
             $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
         }
 
-        $this->addFlash(
-            'info',
-            '<li>Si un compte existe avec votre adresse email, un lien de réinitialisation vient de vous être envoyé.</li>
-            <li>Ce lien expire dans 1 heure.</li>'
-        );
+        $this->addFlash('info', 'Un lien de réinitialisation valide 1h vient de vous être envoyé par email');
 
         return $this->redirectToRoute('tricks_all');
     }
@@ -154,7 +150,7 @@ class ResetPasswordController extends AbstractController
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('secher.jonathan@gmail.com', 'SnowTricks - Réinitialisation du mot de passe'))
+            ->from(new Address($_ENV['MAILER_EMAIL'], 'SnowTricks - Réinitialisation du mot de passe'))
             ->to($user->getEmail())
             ->subject('Your password reset request')
             ->htmlTemplate('reset_password/email.html.twig')
