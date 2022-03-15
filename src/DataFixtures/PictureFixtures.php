@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Picture;
 use App\DataFixtures\TrickFixtures;
 use App\Repository\TrickRepository;
-use App\Service\FileUploader;
+use App\Service\FileManager;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -13,14 +13,14 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 class PictureFixtures extends Fixture implements DependentFixtureInterface
 {
     private TrickRepository $trickRepo;
-    private FileUploader $fileUploader;
+    private FileManager $fileManager;
     private string $fixturesDirectory;
     private string $uploadDirectory;
 
-    public function __construct(TrickRepository $trickRepo, FileUploader $fileUploader, string $fixturesDirectory, string $uploadDirectory)
+    public function __construct(TrickRepository $trickRepo, FileManager $fileManager, string $fixturesDirectory, string $uploadDirectory)
     {
         $this->trickRepo = $trickRepo;
-        $this->fileUploader = $fileUploader;
+        $this->fileManager = $fileManager;
         $this->fixturesDirectory = $fixturesDirectory;
         $this->uploadDirectory = $uploadDirectory;
     }
@@ -46,7 +46,7 @@ class PictureFixtures extends Fixture implements DependentFixtureInterface
         foreach ($filenames as $filename) {
             $originFilePath = $this->fixturesDirectory . '/pictures/' . $filename;
             $targetFilePath = $this->uploadDirectory . '/pictures/' . $filename;
-            $this->fileUploader->copy($originFilePath, $targetFilePath);
+            $this->fileManager->copy($originFilePath, $targetFilePath);
         }
 
         $i = 0;

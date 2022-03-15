@@ -14,11 +14,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class VideoController extends AbstractController
 {
-    private $entitymanager;
+    private $entityManager;
 
-    public function __construct(EntityManagerInterface $entitymanager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entitymanager = $entitymanager;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -35,8 +35,8 @@ class VideoController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $video->setTrick($trick);
 
-            $this->entitymanager->persist($video);
-            $this->entitymanager->flush();
+            $this->entityManager->persist($video);
+            $this->entityManager->flush();
             $this->addFlash('success', 'La vidéo a bien été ajoutée');
 
             return $this->redirectToRoute('trick_show', ['slug' => $trick->getSlug()]);
@@ -54,8 +54,8 @@ class VideoController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function delete(Video $video, string $slug): Response
     {
-        $this->entitymanager->remove($video);
-        $this->entitymanager->flush();
+        $this->entityManager->remove($video);
+        $this->entityManager->flush();
         $this->addFlash('success', 'Vidéo supprimée');
 
         return $this->redirectToRoute('trick_show', ['slug' => $slug]);

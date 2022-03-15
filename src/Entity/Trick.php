@@ -25,13 +25,15 @@ class Trick
     #[Assert\Length(
         min: 3,
         minMessage: 'Le nom du trick doit contenir minimum {{ limit }} caractères',
+        groups: ['Default', 'edit']
     )]
     private $name;
 
     #[ORM\Column(type: 'text')]
     #[Assert\Length(
         min: 50,
-        minMessage: 'La description du trick doit contenir minimum {{ limit }} caractères'
+        minMessage: 'La description du trick doit contenir minimum {{ limit }} caractères',
+        groups: ['Default', 'edit']
     )]
     private $content;
 

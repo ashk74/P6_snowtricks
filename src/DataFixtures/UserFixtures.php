@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
-use App\Service\FileUploader;
+use App\Service\FileManager;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -14,14 +14,14 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class UserFixtures extends Fixture
 {
     private UserPasswordHasherInterface $passwordHasher;
-    private FileUploader $fileUploader;
+    private FileManager $fileManager;
     private string $fixturesDirectory;
     private string $uploadDirectory;
 
-    public function __construct(UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, string $fixturesDirectory, string $uploadDirectory)
+    public function __construct(UserPasswordHasherInterface $passwordHasher, FileManager $fileManager, string $fixturesDirectory, string $uploadDirectory)
     {
         $this->passwordHasher = $passwordHasher;
-        $this->fileUploader = $fileUploader;
+        $this->fileManager = $fileManager;
         $this->fixturesDirectory = $fixturesDirectory;
         $this->uploadDirectory = $uploadDirectory;
     }
@@ -35,7 +35,7 @@ class UserFixtures extends Fixture
         $originFilePath = $this->fixturesDirectory . '/avatars/default-avatar.png';
         $targetFilePath = $this->uploadDirectory . '/avatars/default-avatar.png';
 
-        $this->fileUploader->copy($originFilePath, $targetFilePath);
+        $this->fileManager->copy($originFilePath, $targetFilePath);
 
         $user->setEmail($_ENV['ACCOUNT_EMAIL'])
             ->setAvatar('default-avatar.png')

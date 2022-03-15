@@ -33,7 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $avatar = 'default-avatar.jpg';
 
     #[Assert\Length(
-        min: 4,
+        min: 5,
         minMessage: 'Doit contenir minimum {{ limit }} caractères'
     )]
     #[ORM\Column(type: 'string', length: 255)]

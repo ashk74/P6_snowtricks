@@ -7,8 +7,6 @@ use App\Entity\Comment;
 use App\Entity\Picture;
 use App\Form\TrickType;
 use App\Form\CommentType;
-use App\Repository\CategoryRepository;
-use App\Repository\TrickRepository;
 use App\Service\FileManager;
 use App\Service\Pagination;
 
@@ -22,11 +20,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TrickController extends AbstractController
 {
-    private $entitymanager;
+    private $entityManager;
 
-    public function __construct(EntityManagerInterface $entitymanager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entitymanager = $entitymanager;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -80,8 +78,8 @@ class TrickController extends AbstractController
             $trick->setCreatedAt(new \DateTime())
                 ->setSlug($slugger->slug(strtolower($trick->getName()), '-', 'en'));
 
-            $this->entitymanager->persist($trick);
-            $this->entitymanager->flush();
+            $this->entityManager->persist($trick);
+            $this->entityManager->flush();
 
             $this->addFlash('success', "Le trick a bien été ajouté");
 
@@ -132,8 +130,8 @@ class TrickController extends AbstractController
                 ->setAuthor($this->getUser())
                 ->setCreatedAt(new \DateTime());
 
-            $this->entitymanager->persist($comment);
-            $this->entitymanager->flush();
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
 
             $this->addFlash('success', 'Votre commentaire a bien été publié');
 
@@ -154,7 +152,7 @@ class TrickController extends AbstractController
     #[Route('/trick/{slug}/edit', name: 'trick_edit')]
     public function edit(Trick $trick, SluggerInterface $slugger, Request $request): Response
     {
-        $form = $this->createForm(TrickType::class, $trick, ['validation_groups' => false]);
+        $form = $this->createForm(TrickType::class, $trick, ['validation_groups' => ['edit']]);
 
         $content = $trick->getContent();
         $name = $trick->getName();
@@ -166,7 +164,7 @@ class TrickController extends AbstractController
                 $trick->setUpdatedAt(new \DateTime())
                     ->setSlug($slugger->slug(strtolower($trick->getName()), '-', 'en'));
 
-                $this->entitymanager->flush();
+                $this->entityManager->flush();
 
                 $this->addFlash('success', "Le trick a bien été modifié");
 
@@ -187,8 +185,8 @@ class TrickController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function delete(Trick $trick): Response
     {
-        $this->entitymanager->remove($trick);
-        $this->entitymanager->flush();
+        $this->entityManager->remove($trick);
+        $this->entityManager->flush();
         $this->addFlash('success', 'Trick supprimé');
 
         return $this->redirectToRoute('tricks_all');

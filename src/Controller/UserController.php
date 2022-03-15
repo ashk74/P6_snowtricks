@@ -14,11 +14,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class UserController extends AbstractController
 {
-    private EntityManagerInterface $entitymanager;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entitymanager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entitymanager = $entitymanager;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -48,8 +48,8 @@ class UserController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $fileManager->upload($file, 'avatars');
             $user->setAvatar($fileManager->getFinalFileName());
-            $this->entitymanager->persist($user);
-            $this->entitymanager->flush();
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             if ($oldAvatar != 'default-avatar.png') {
                 $fileManager->remove('avatars', $oldAvatar);
@@ -73,8 +73,8 @@ class UserController extends AbstractController
     #[IsGranted('USER_PROFILE', subject: 'user')]
     public function delete(User $user): Response
     {
-        $this->entitymanager->remove($user);
-        $this->entitymanager->flush();
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
 
         $this->container->get('security.token_storage')->setToken(null);
         $this->addFlash('success', 'Votre compte a bien été supprimé');

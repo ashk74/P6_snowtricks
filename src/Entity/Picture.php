@@ -15,6 +15,10 @@ class Picture
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Type(
+        type: Picture::class,
+        groups: ['edit']
+    )]
     private $filename;
 
     #[ORM\Column(type: 'boolean')]
