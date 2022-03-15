@@ -15,11 +15,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PictureController extends AbstractController
 {
-    private EntityManagerInterface $entitymanager;
+    private EntityManagerInterface $entityManager;
+    private FileManager $fileManager;
 
-    public function __construct(EntityManagerInterface $entitymanager)
+    public function __construct(EntityManagerInterface $entityManager, FileManager $fileManager)
     {
-        $this->entitymanager = $entitymanager;
+        $this->entityManager = $entityManager;
+        $this->fileManager = $fileManager;
     }
 
     /**
@@ -27,7 +29,7 @@ class PictureController extends AbstractController
      */
     #[IsGranted('ROLE_USER')]
     #[Route('/trick/{slug}/picture/add', name: 'picture_add')]
-    public function add(Request $request, FileManager $fileManager, Trick $trick): Response
+    public function add(Request $request, Trick $trick): Response
     {
         $form = $this->createForm(PictureType::class);
         $form->handleRequest($request);
@@ -35,16 +37,16 @@ class PictureController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $files != null) {
             foreach ($form->get('filename')->getData() as $file) {
-                $fileManager->upload($file, 'pictures');
+                $this->fileManager->upload($file, 'pictures');
                 $picture = new Picture();
                 $picture->setTrick($trick)
-                    ->setFilename($fileManager->getFinalFileName());
+                    ->setFilename($this->fileManager->getFinalFileName());
                 $trick->addPicture($picture);
             }
 
-            $this->entitymanager->persist($picture);
-            $this->entitymanager->flush();
-            $this->addFlash('success', 'Les photos ont bien été ajoutées');
+            $this->entityManager->persist($picture);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Les images ont bien été ajoutées');
 
             return $this->redirectToRoute('trick_show', ['slug' => $trick->getSlug()]);
         }
@@ -55,15 +57,45 @@ class PictureController extends AbstractController
     }
 
     /**
+     * Set main picture
+     */
+    #[IsGranted('ROLE_USER')]
+    #[Route('/trick/{slug}/picture/{id}/set-main', name: 'picture_set_main')]
+    public function setMainPicture(Picture $selectedPicture, string $slug): Response
+    {
+        foreach ($selectedPicture->getTrick()->getPictures() as $picture) {
+            if ($picture->getIsMain() === true) {
+                if ($picture->getFilename() === 'default-picture.png') {
+                    $this->entityManager->remove($picture);
+                }
+
+                if ($picture != null) {
+                    $picture->setIsMain(false);
+                }
+
+                $selectedPicture->setIsMain(true);
+                $this->entityManager->flush();
+                $this->addFlash('success', 'Photo principale modifiée');
+
+                return $this->redirectToRoute('trick_show', ['slug' => $slug]);
+            }
+        }
+    }
+
+    /**
      * Delete : Delete current picture
      */
     #[IsGranted('ROLE_USER')]
     #[Route('/trick/{slug}/picture/{id}/delete', name: 'picture_delete')]
-    public function delete(Picture $picture, FileManager $fileManager, string $slug): Response
+    public function delete(Picture $picture, string $slug): Response
     {
-        $this->entitymanager->remove($picture);
-        $this->entitymanager->flush();
-        $fileManager->remove('pictures', $picture->getFilename());
+        $oldPicture = $picture->getFilename();
+        $this->entityManager->remove($picture);
+        $this->entityManager->flush();
+
+        if ($oldPicture != 'default-picture.png') {
+            $this->fileManager->remove('pictures', $picture->getFilename());
+        }
 
         $this->addFlash('success', 'Photo supprimée');
 

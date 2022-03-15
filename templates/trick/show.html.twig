@@ -43,7 +43,9 @@
 										</div>
 										{% if is_granted('ROLE_USER') %}
 											<div class="text-center small mb-2 border">
-												<a href="{{ path('picture_delete', {'slug' : trick.slug, 'id' : picture.id }) }}" class="link-danger text-decoration-none">Supprimer</a>
+												<a href="{{ path('picture_set_main', {'slug' : trick.slug, 'id' : picture.id }) }}" class="link-primary text-decoration-none d-block" onclick="return window.confirm('Voulez-vous vraiment changer de photo principale ?')">Définir photo principale</a>
+
+												<a href="{{ path('picture_delete', {'slug' : trick.slug, 'id' : picture.id }) }}" class="link-danger text-decoration-none d-block" onclick="return window.confirm('Voulez-vous vraiment supprimer cette photo ?')">Supprimer</a>
 											</div>
 										{% endif %}
 									</div>
