@@ -3,63 +3,192 @@
 namespace App\Controller;
 
 use App\Entity\Trick;
+use App\Entity\Comment;
+use App\Entity\Picture;
 use App\Form\TrickType;
-use App\Repository\TrickRepository;
+use App\Form\CommentType;
+use App\Service\FileManager;
+use App\Service\Pagination;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TrickController extends AbstractController
 {
-    #[Route('/', name: 'tricks_all')]
-    public function index(TrickRepository $repository): Response
-    {
-        $tricks = $repository->findAll();
+    private $entityManager;
 
-        return $this->render('trick/index.html.twig', [
-            'tricks' => $tricks
-        ]);
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
     }
 
-    #[Route('/trick/new', name: 'trick_create')]
-    #[Route('/trick/edit/{slug}', name: 'trick_update')]
-    public function create(Request $request, EntityManagerInterface $manager, Trick $trick = null): Response
+    /**
+     * Add : Add a new trick
+     *
+     * @param \Symfony\Component\String\Slugger\SluggerInterface $slugger
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \App\Service\FileManager $fileManager
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    #[IsGranted('ROLE_USER')]
+    #[Route('/trick/add', name: 'trick_add')]
+    public function add(SluggerInterface $slugger, Request $request, FileManager $fileManager): Response
     {
-        if (!$trick) {
-            $trick = new Trick();
-        }
+        $trick = new Trick();
 
         $form = $this->createForm(TrickType::class, $trick);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$trick->getId()) {
-                $trick->setCreatedAt(new \DateTime());
-            } else {
-                $trick->setUpdatedAt(new \DateTime());
+            $mainPictureFilename = 'default-picture.png';
+
+            // Check if mainPicture is not empty
+            if ($form->get('mainPicture')->getData() != null) {
+                $mainPictureFilename = $fileManager->upload($form->get('mainPicture')->getData(), 'pictures');
             }
 
-            $manager->persist($trick);
-            $manager->flush();
+            // Set main picture
+            $mainPicture = new Picture();
+            $mainPicture->setTrick($trick)
+                ->setFilename($mainPictureFilename)
+                ->setIsMain(true);
+            $trick->addPicture($mainPicture);
+
+            // Set other pictures
+            foreach ($form->get('pictures')->getData() as $file) {
+                $pictureFilename = $fileManager->upload($file, 'pictures');
+                $picture = new Picture();
+                $picture->setTrick($trick)
+                    ->setFilename($pictureFilename);
+                $trick->addPicture($picture);
+            }
+
+            // Set videos
+            foreach ($trick->getVideos() as $video) {
+                $video->setTrick($trick);
+            }
+
+            // Set date and slug
+            $trick->setCreatedAt(new \DateTime())
+                ->setSlug($slugger->slug(strtolower($trick->getName()), '-', 'en'));
+
+            $this->entityManager->persist($trick);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', "Le trick a bien été ajouté");
+
+            return $this->redirectToRoute('tricks_all');
+        }
+
+        return $this->renderForm('trick/add.html.twig', [
+            'form' => $form
+        ]);
+    }
+
+    /**
+     * Homepage : List all tricks with pagination
+     */
+    #[Route('/', name: 'tricks_all')]
+    #[Route('/tricks/page/{page}', name: 'tricks_all_paginated', requirements: ['page' => '\d+'])]
+    public function all(Pagination $paginator, int $page = 1): Response
+    {
+        $paginator->setQuery('SELECT trick FROM App\Entity\Trick trick ORDER BY trick.createdAt DESC');
+
+        $tricks = $paginator->paginate($page, 15);
+
+        if (!$tricks->getIterator()->valid() && $paginator->getLastPage() != 0) {
+            return $this->redirectToRoute('tricks_all_paginated', ['page' => $paginator->getLastPage()]);
+        }
+
+        return $this->render('trick/all.html.twig', [
+            'tricks' => $tricks,
+            'lastPage' => $paginator->getLastPage(),
+            'currentPage' => $page
+        ]);
+    }
+
+    /**
+     * Show : Display trick informations and comments
+     */
+    #[Route('/trick/{slug}', name: 'trick_show')]
+    #[Route('/trick/{slug}/page/{page}', name: 'trick_paginated_comments', requirements: ['page' => '\d+'])]
+    public function show(Trick $trick, Request $request): Response
+    {
+        $comment = new Comment();
+
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setTrick($trick)
+                ->setAuthor($this->getUser())
+                ->setCreatedAt(new \DateTime());
+
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Votre commentaire a bien été publié');
 
             return $this->redirectToRoute('trick_show', ['slug' => $trick->getSlug()]);
         }
 
-        $errors = $form->getErrors();
-
-        return $this->renderForm('trick/create.html.twig', [
-            'form' => $form,
-            'editMode' => $trick->getId() !== null
+        // Render if success
+        return $this->renderForm('trick/show.html.twig', [
+            'trick' => $trick,
+            'commentForm' => $form
         ]);
     }
 
-    #[Route('/trick/details/{slug}', name: 'trick_show', methods: ['GET'])]
-    public function show(Trick $trick)
+    /**
+     * Edit : Edit current trick
+     */
+    #[IsGranted('ROLE_USER')]
+    #[Route('/trick/{slug}/edit', name: 'trick_edit')]
+    public function edit(Trick $trick, SluggerInterface $slugger, Request $request): Response
     {
-        return $this->render('trick/show.html.twig', [
+        $form = $this->createForm(TrickType::class, $trick, ['validation_groups' => ['edit']]);
+
+        $content = $trick->getContent();
+        $name = $trick->getName();
+        $form->handleRequest($request);
+        $trick->setUpdatedAt(new \DateTime());
+
+        if ($trick->getContent() != $content || $trick->getName() != $name) {
+            if ($form->isSubmitted() && $form->isValid()) {
+                $trick->setUpdatedAt(new \DateTime())
+                    ->setSlug($slugger->slug(strtolower($trick->getName()), '-', 'en'));
+
+                $this->entityManager->flush();
+
+                $this->addFlash('success', "Le trick a bien été modifié");
+
+                return $this->redirectToRoute('trick_show', ['slug' => $trick->getSlug()]);
+            }
+        }
+
+        return $this->renderForm('trick/edit.html.twig', [
+            'form' => $form,
             'trick' => $trick
         ]);
+    }
+
+    /**
+     * Delete : Delete current trick
+     */
+    #[Route('/trick/{slug}/delete', name: 'trick_delete')]
+    #[IsGranted('ROLE_USER')]
+    public function delete(Trick $trick): Response
+    {
+        $this->entityManager->remove($trick);
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Trick supprimé');
+
+        return $this->redirectToRoute('tricks_all');
     }
 }

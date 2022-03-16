@@ -1,0 +1,31 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	{% if error %}
+        <div class="alert alert-warning alert-dismissible fade show rounded-0 border-0" role="alert">
+			<div class="text-center lead">
+				<i class="bi bi-exclamation-square"></i> {{ error.messageKey|trans(error.messageData, 'security') }}
+			</div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+    {% endif %}
+
+	<h1>Connexion</h1>
+
+	<form action="{{ path('app_login') }}" method="post">
+		<div class="mb-3">
+			<input type="email" class="form-control" placeholder="Email" name="_username" value="{{ last_username }}" required>
+		</div>
+		<div class="mb-3">
+			<input type="password" class="form-control" placeholder="Mot de passe" name="_password" required>
+		</div>
+		<div class="mb-3">
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+		</div>
+		<div class="mb-3">
+			<button type="submit" class="btn btn-success">Connexion</button>
+		</div>
+	</form>
+
+	<a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
+{% endblock %}

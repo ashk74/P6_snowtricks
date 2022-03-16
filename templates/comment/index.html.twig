@@ -1,0 +1,54 @@
+{% block component %}
+    <div class="p-2 my-4 border rounded">
+        {# Start : Display comments content #}
+        <h3 class="text-center py-2">{{ comments.count > 0 ? comments.count ~ ' commentaires' : 'Aucun commentaire' }}</h3>
+        {% for comment in comments.iterator %}
+            <div class="card font-monospace my-2">
+                <div class="card-header">
+                    <div class="ratio ratio-1x1 mb-2" style="height:40px; width:40px;">
+                        <div class="rounded-circle" style="background: transparent url({{ asset('uploads/avatars/' ~ comment.author.avatar) }}); background-position:center top; background-repeat:no-repeat; background-size:cover;"></div>
+                    </div>
+                    <h6 class="text-secondary d-inline">
+                        {{ comment.author.fullname }} | {{ comment.createdAt | date('d/m/Y | H:i', 'Europe/Paris') }}
+                    </h6>
+                </div>
+
+                <div class="card-body">
+                    <p class="card-text">{{ comment.content | nl2br }}</p>
+                </div>
+
+                {% if is_granted('COMMENT_DELETE', comment) %}
+                    <div class="card-footer text-end">
+                        <a href="{{ path('comment_delete', {'id' : comment.id }) }}" class="link-danger text-decoration-none">Supprimer</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        {# End : Display comments content #}
+    </div>
+
+    {% if lastPage > 1 %}
+        {% set currentPage = app.request.get('page') %}
+		{# Start : Pagination system #}
+		<div>
+			<nav>
+				<ul class="pagination justify-content-center">
+					<li class="page-item {{ currentPage <= 1 ? 'disabled' }}">
+						<a class="page-link" href="{{ path('trick_paginated_comments', {'slug': trick.slug, 'page': currentPage != 1 ? currentPage - 1 : 1}) }}">&laquo;</a>
+					</li>
+
+					{% for page in range(1, lastPage) %}
+						<li class="page-item {{ currentPage == page ? 'active' : '' }}">
+							<a class="page-link" href="{{ path('trick_paginated_comments', {'slug': trick.slug, 'page': page}) }}">{{ page }}</a>
+						</li>
+					{% endfor %}
+
+					<li class="page-item {{ currentPage >= lastPage ? 'disabled' }}">
+						<a class="page-link" href="{{ path('trick_paginated_comments', {'slug': trick.slug, 'page': currentPage != lastPage ? currentPage + 1 : lastPage}) }}">&raquo;</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+		{# End : Pagination system #}
+	{% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ parent() }} | Accueil
+{% endblock %}
+
+{% block header %}
+	<header id="index-header" class="border border-primary">
+		<div class="container h-100">
+			<div class="row h-100 align-items-center">
+				<div class="col-12 text-center">
+					<h1>Welcome to SnowTricks</h1>
+					<p>The best way to become a freestyler</p>
+					<div class="position-absolute bottom-0 end-0 border border-danger"><a href="#go-to-bottom"><i class="fa-solid fa-square-caret-down fa-2xl"></i></a></div>
+				</div>
+			</div>
+		</div>
+	</header>
+	<button
+        type="button"
+        class="btn btn-danger btn-floating rounded-circle"
+        id="btn-back-to-top"
+        >
+		<i id="scroll-icon" class="fas fa-arrow-down"></i>
+	</button>
+{% endblock %}
+
+{% block body %}
+	<section>
+		<div class="row">
+			{% if tricks.iterator.count != 0 %}
+				<h2 id="go-to-bottom">Tricks les plus récents</h2>
+				{% for trick in tricks.iterator %}
+					<div class="card-group col-lg-4 mt-3">
+						<div class="card rounded">
+							{% for picture in trick.pictures %}
+								{% if picture.isMain == true %}
+									<div class="ratio ratio-16x9">
+										<div class="rounded-top" style="background: transparent url({{ asset('uploads/pictures/' ~ picture.filename) }}); background-position:center top; background-repeat:no-repeat; background-size:cover;"></div>
+									</div>
+								{% endif %}
+							{% endfor %}
+
+							<div class="card-body text-center">
+								<div class="text-secondary h6">{{ trick.category.name }}</div>
+								<a href="{{ path('trick_show', {'slug': trick.slug}) }}" class="card-link text-decoration-none h5 text-info">{{ trick.name | u.truncate(20, '...') }}</a>
+								{% if is_granted('ROLE_USER') %}
+									<a href="{{ path('trick_edit', {'slug': trick.slug}) }}" class="card-link text-decoration-none text-secondary">
+										<i class="fa-solid fa-pen-to-square"></i>
+									</a>
+									<a href="{{ path('trick_delete', {'slug': trick.slug}) }}" class="card-link text-decoration-none text-danger" onclick="return window.confirm('Voulez-vous vraiment supprimer ce trick : {{ trick.name }} ?')">
+										<i class="fas fa-trash"></i>
+									</a>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			{% else %}
+				<h2 class="text-center">Aucun trick</h2>
+				<div class="text-center">
+					<a href="{{ path('trick_add') }}" class="btn btn-success my-4 col-4" role="button">Ajouter le premier trick</a>
+				</div>
+			{% endif %}
+		</div>
+	</section>
+	<nav class="mt-4">
+		{% if lastPage > 1 %}
+			<ul class="pagination justify-content-center">
+				<li class="page-item {{ currentPage <= 1 ? 'disabled' }}">
+					<a class="page-link" href="{{ path('tricks_all_paginated', {'page': currentPage != 1 ? currentPage - 1 : 1}) }}">&laquo;</a>
+				</li>
+
+				{% for page in range(1, lastPage) %}
+					<li class="page-item {{ currentPage == page ? 'active' : '' }}">
+						<a class="page-link" href="{{ path('tricks_all_paginated', {'page': page}) }}">{{ page }}</a>
+					</li>
+				{% endfor %}
+				<li class="page-item {{ currentPage >= lastPage ? 'disabled' }}">
+					<a class="page-link" href="{{ path('tricks_all_paginated', {'page': currentPage != lastPage ? currentPage + 1 : lastPage}) }}">&raquo;</a>
+				</li>
+			</ul>
+		{% endif %}
+	</nav>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('assets/js/manage-videos-collection.js') }}"></script>
+	<script src="{{ asset('assets/js/scroll.js') }}"></script>
+{% endblock %}
+

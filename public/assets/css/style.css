@@ -1,0 +1,27 @@
+#index-header {
+  height: 100vh;
+  min-height: 500px;
+  color: white;
+  background-image: url('../images/mountain-header.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+#btn-back-to-top {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  bottom: 20px;
+  right: 20px;
+  display: none;
+  z-index: 10;
+}

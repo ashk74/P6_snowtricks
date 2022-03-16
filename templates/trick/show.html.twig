@@ -1,10 +1,135 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello world !
+{% block title %}
+	{{ parent() }} | {{ trick.name }}
 {% endblock %}
 
 {% block body %}
-	<h1>{{ trick.name }}</h1>
-	<p>{{ trick.content }}</p>
-	<small>{{ trick.createdAt|date('d/m/Y à H:i') }}</small>
+	{# Start : Trick content #}
+	<article>
+		<h2 class="d-inline">{{ trick.name }}</h2>
+		{% if is_granted('ROLE_USER') %}
+			<a href="{{ path('trick_edit', {'slug': trick.slug}) }}" class="text-decoration-none d-inline">
+				| Modifier |
+			</a>
+			<a href="{{ path('trick_delete', {'slug': trick.slug}) }}" class="text-danger text-decoration-none d-inline" onclick="return window.confirm('Voulez-vous vraiment supprimer ce trick : {{ trick.name }} ?')">
+				Supprimer
+			</a>
+		{% endif %}
+
+		{% for picture in trick.pictures %}
+			{% if picture.isMain == true %}
+				<div class="ratio ratio-16x9 mt-4">
+					<div class="rounded-top" style="background: transparent url({{ asset('uploads/pictures/' ~ picture.filename) }}); background-position:center top; background-repeat:no-repeat; background-size:cover;"></div>
+				</div>
+			{% endif %}
+		{% endfor %}
+
+		<div class="accordion" id="accordion-flush">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="flush-headingOne">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+						Photos
+					</button>
+				</h2>
+				<div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordion-flush">
+					<div class="accordion-body row">
+						{% if trick.pictures.count > 1 %}
+							{% for picture in trick.pictures %}
+								{% if picture.isMain == false %}
+									<div class="col-md-3 mt-2">
+										<div class="ratio ratio-4x3">
+											<div style="background: transparent url({{ asset('uploads/pictures/' ~ picture.filename) }}); background-position:center top; background-repeat:no-repeat; background-size:cover;"></div>
+										</div>
+										{% if is_granted('ROLE_USER') %}
+											<div class="text-center small mb-2 border">
+												<a href="{{ path('picture_set_main', {'slug' : trick.slug, 'id' : picture.id }) }}" class="link-primary text-decoration-none d-block" onclick="return window.confirm('Voulez-vous vraiment changer de photo principale ?')">Définir photo principale</a>
+
+												<a href="{{ path('picture_delete', {'slug' : trick.slug, 'id' : picture.id }) }}" class="link-danger text-decoration-none d-block" onclick="return window.confirm('Voulez-vous vraiment supprimer cette photo ?')">Supprimer</a>
+											</div>
+										{% endif %}
+									</div>
+								{% endif %}
+							{% endfor %}
+						{% endif %}
+						<div class="col-md-1">
+							<a class="btn btn-primary mt-2" href="{{ path('picture_add', {'slug' : trick.slug}) }}"><i class="fa-solid fa-plus fa-2xl"></i></a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="flush-headingTwo">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+					Vidéos
+				</button>
+				</h2>
+				<div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordion-flush">
+					<div class="accordion-body row">
+						{% if trick.videos.count >= 1 %}
+							{% for video in trick.videos %}
+								<div class="col-md-4 mb-3">
+									{{ embed_video(video.url, video.title)|raw }}
+									{% if is_granted('ROLE_USER') %}
+										<div class="text-center small border">
+											<a href="{{ path('video_delete', {'slug' : trick.slug, 'id' : video.id }) }}" class="link-danger text-decoration-none">Supprimer</a>
+										</div>
+									{% endif %}
+								</div>
+							{% endfor %}
+						{% endif %}
+						<div class="col-md-1">
+							<a class="btn btn-primary" href="{{ path('video_add', {'slug' : trick.slug}) }}"><i class="fa-solid fa-plus fa-2xl"></i></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="px-2 py-4" style="text-align: justify;">
+			{{ trick.content|nl2br }}
+		</div>
+
+		<div class="text-center py-2">
+			<span class="badge rounded-pill bg-info p-2 mx-2 fs-6 mb-2">
+				<i class="fa-solid fa-tag"></i> Catégorie : {{ trick.category.name }}
+			</span>
+			<span class="badge rounded-pill bg-info p-2 mx-2 fs-6 mb-2">
+				<i class="fa-solid fa-circle-plus"></i> Publié : {{ trick.createdAt|date('d/m/Y | H:i') }}
+			</span>
+
+			{% if trick.updatedAt is not null %}
+				<span class="badge rounded-pill bg-info p-2 mx-2 fs-6">
+					<i class="fa-solid fa-rotate-right"></i> Mis à jour : {{ trick.updatedAt|date('d/m/Y | H:i') }}
+				</span>
+			{% endif %}
+		</div>
+	</article>
+	{# End : Trick content #}
+
+	{# Start : Comment form + Comments content #}
+	<section class="py-2 px-2 border rounded">
+		<div>
+			{# Start : Check if the user is authenticated #}
+			{% if is_granted('ROLE_USER') %}
+				{{ form_start(commentForm) }}
+				{{ form_row(commentForm.content, {'attr': {'placeholder': 'Contenu du commentaire'}, 'label' : false}) }}
+				<button type="submit" class="btn btn-success form-control">Commenter</button>
+				{{ form_end(commentForm) }}
+			{% else %}
+				<div class="text-center">
+					<a href="{{ path('app_login') }}" class="btn btn-success" role="button">Connectez-vous pour commenter cet article</a>
+				</div>
+			{% endif %}
+			{# End : Check if the user is authenticated #}
+		</div>
+
+		{# Start : Paginated comments #}
+		{{ render(path('comments_paginated', {
+			'page' : app.request.get('page'),
+			'slug' : trick.slug
+		})) }}
+		{# End : Paginated comments #}
+	</section>
+	{# End : Comment form + Comments content #}
 {% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | Mot de passe oublié ?
+{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes('reset_password_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+    <h1>Demande de Réinitialisation </h1>
+
+    {{ form_start(requestForm) }}
+        {{ form_row(requestForm.email) }}
+        <div>
+            <small>
+                Saisissez l'adresse e-mail associé à votre compte SnowTricks
+            </small>
+        </div>
+
+        <button class="btn btn-primary">Continuer</button>
+    {{ form_end(requestForm) }}
+{% endblock %}

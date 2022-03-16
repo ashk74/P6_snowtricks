@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | Inscription
+{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes('verify_email_error') %}
+        (-)
+    {% endfor %}
+
+	<h1>Créer un compte</h1>
+	<hr>
+	{{ form_start(registrationForm) }}
+		<div class="mb-3">
+			{{ form_widget(registrationForm.fullname, {'attr': {'placeholder': "Nom et prénom"}, 'label' : false}) }}
+			{{ form_errors(registrationForm.fullname) }}
+			<div id="registration-fullname-result" class="d-block"></div>
+		</div>
+
+		{{ form_row(registrationForm.email, {'attr': {'placeholder': "Adresse email"}, 'label' : false}) }}
+
+		<div class="mb-3">
+			{{ form_widget(registrationForm.password.first) }}
+			{{ form_errors(registrationForm.password.first) }}
+			<div id="registration-password-first-result" class="d-block"></div>
+		</div>
+
+		<div class="mb-3">
+			{{ form_widget(registrationForm.password.second) }}
+			{{ form_errors(registrationForm.password.second) }}
+			<div id="registration-password-second-result" class="d-block"></div>
+		</div>
+
+		<button type="submit" class="btn btn-success">Inscription</button>
+
+	{{ form_end(registrationForm) }}
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('assets/js/manage-videos-collection.js') }}"></script>
+	<script src="{{ asset('assets/js/count-field-char.js') }}"></script>
+{% endblock %}
+
