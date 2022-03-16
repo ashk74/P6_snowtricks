@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block header %}
-	<header class="index-header">
+	<header id="index-header" class="border border-primary">
 		<div class="container h-100">
 			<div class="row h-100 align-items-center">
 				<div class="col-12 text-center">
@@ -16,6 +16,13 @@
 			</div>
 		</div>
 	</header>
+	<button
+        type="button"
+        class="btn btn-danger btn-floating rounded-circle"
+        id="btn-back-to-top"
+        >
+		<i id="scroll-icon" class="fas fa-arrow-down"></i>
+	</button>
 {% endblock %}
 
 {% block body %}
@@ -76,3 +83,10 @@
 		{% endif %}
 	</nav>
 {% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('assets/js/manage-videos-collection.js') }}"></script>
+	<script src="{{ asset('assets/js/scroll.js') }}"></script>
+{% endblock %}
+
