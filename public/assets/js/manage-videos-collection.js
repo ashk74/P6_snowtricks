@@ -1,10 +1,10 @@
 // Manage video fields when adding a new trick
 
 const addFormToCollection = (e) => {
-    const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
+    const collectionHolder = document.querySelector("." + e.currentTarget.dataset.collectionHolderClass);
 
-    const item = document.createElement('li');
-    item.className = 'list-unstyled my-4';
+    const item = document.createElement("li");
+    item.className = "list-unstyled my-4";
 
     item.innerHTML = collectionHolder
         .dataset
@@ -21,26 +21,26 @@ const addFormToCollection = (e) => {
 };
 
 const addVideoFormDeleteLink = (item) => {
-    const removeFormButton = document.createElement('button');
-    removeFormButton.className = 'btn btn-danger btn-sm text-end';
-    removeFormButton.innerText = 'Supprimer';
+    const removeFormButton = document.createElement("button");
+    removeFormButton.className = "btn btn-danger btn-sm text-end";
+    removeFormButton.innerText = "Supprimer";
 
     item.append(removeFormButton);
 
-    removeFormButton.addEventListener('click', (e) => {
+    removeFormButton.addEventListener("click", (e) => {
         e.preventDefault();
         item.remove();
     });
 }
 
 document
-    .querySelectorAll('.add_item_link')
+    .querySelectorAll(".add_item_link")
     .forEach(btn => {
         btn.addEventListener("click", addFormToCollection)
     });
 
 document
-    .querySelectorAll('ul.videos li')
+    .querySelectorAll("ul.videos li")
     .forEach((trick_videos) => {
         addVideoFormDeleteLink(trick_videos)
     })
