@@ -100,7 +100,7 @@
 
 			{% if trick.updatedAt is not null %}
 				<span class="badge rounded-pill bg-info p-2 mx-2 fs-6">
-					<i class="fa-solid fa-rotate-right"></i> Mis à jour : {{ trick.updatedAt|date('d/m/Y | H:i') }}
+					<i class="fa-solid fa-rotate-right"></i> Mis à jour : {{ trick.updatedAt|date('d/m/Y | H:i', 'Europe/Paris') }}
 				</span>
 			{% endif %}
 		</div>
