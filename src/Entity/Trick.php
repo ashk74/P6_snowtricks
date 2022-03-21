@@ -12,7 +12,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: TrickRepository::class)]
 #[UniqueEntity(
     fields: ['name'],
-    message: 'Veuillez modifier votre {{ label }} car : {{ value }} n\'est pas disponible'
+    message: 'Veuillez modifier le nom du trick : {{ value }} n\'est pas disponible',
+    groups: ['Default', 'edit']
 )]
 class Trick
 {
